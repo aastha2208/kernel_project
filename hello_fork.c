@@ -10,6 +10,6 @@ int main()
     else if (id == 0) 
         printf("Hello! I am the Child Process. My ID is %d\n", getpid()); 
     else 
-        printf("Hello! I am the Parent Process. My Child's ID is %d\n", id);
+        printf("Hello! I am the Parent Process. My Child's ID is %d and my id is %d\n", id,getppid());
     return 0;
 }

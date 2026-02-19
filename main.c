@@ -1,37 +1,29 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include "context.h"
+#include <stdio.h>
+#include "fibre.h"
 
-// The function we want to switch to
-void fibre_function() {
-    printf("Successfully jumped into the Fibre function!\n");
-    printf("Day 1 goal reached. Exiting...\n");
+// External assembly function from Day 1
+extern void context_switch(struct context *old, struct context *new);
+
+struct context main_ctx;
+
+void task_one() {
+    printf("Task 1: The factory successfully created me!\n");
+    printf("Task 1: I am running on my own private stack.\n");
+    // For now, we still exit here because we don't have a scheduler yet
     exit(0); 
 }
 
-struct context main_ctx;
-struct context fibre_ctx;
-char fibre_stack[4096]; // 4KB of memory for the new task's stack
-
 int main() {
-    printf("Starting the Kernel Shell Project...\n");
+    printf("Starting Day 2: The Fibre Factory...\n");
 
-    // 1. Setup the new stack
-    // Point to the end of the array because stacks grow DOWNWARDS
-    uint64_t *rsp = (uint64_t *)&fibre_stack[4096];
+    // Create a new fibre using our factory function
+    struct fibre *my_fibre = fibre_create(task_one);
+
+    printf("Switching to Task 1...\n");
     
-    // 2. "Push" the function address onto the stack
-    // This mimics what happens when a function is called
-    *(--rsp) = (uint64_t)fibre_function;
-
-    // 3. Set the context's stack pointer to our manually crafted stack
-    fibre_ctx.rsp = (uint64_t)rsp;
-
-    printf("About to switch context...\n");
-    
-    // Call our Assembly function
-    extern void context_switch(struct context*, struct context*);
-    context_switch(&main_ctx, &fibre_ctx);
+    // Switch from Main to our new Fibre
+    context_switch(&main_ctx, &my_fibre->context);
 
     return 0;
 }
